@@ -28,7 +28,7 @@ public class PlayerInventoryManager {
         try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file))) {
             outputStream.writeObject(playerInventories);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 

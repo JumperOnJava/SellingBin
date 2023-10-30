@@ -1,11 +1,14 @@
 package dev.v4lk.sellingbin;
 
+import net.minecraft.util.Formatting;
+
 public class Trade {
     private String name;
     private String currency;
     private int sellPrice;
     private int sellAmount;
-
+    private String color = Integer.toString(Formatting.DARK_GRAY.getColorIndex(),16).toUpperCase();
+    private static final String DEFAULT_COLOR = "FF555555";
     public String getName() {
         return name;
     }
@@ -36,5 +39,14 @@ public class Trade {
 
     public void setSellAmount(int sellAmount) {
         this.sellAmount = sellAmount;
+    }
+
+    public int getColor() {
+            if(this.color.equals("8"))
+                this.color = DEFAULT_COLOR;
+            return Integer.parseUnsignedInt(this.color,16);
+    }
+    public void setColor(int color) {
+        this.color = Integer.toHexString(color);
     }
 }

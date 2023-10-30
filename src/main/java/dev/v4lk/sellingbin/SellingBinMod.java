@@ -11,8 +11,13 @@ import dev.v4lk.sellingbin.bins.iron.IronBinBlockEntity;
 import dev.v4lk.sellingbin.bins.wooden.WoodenBinBlock;
 import dev.v4lk.sellingbin.bins.wooden.WoodenBinBlockEntity;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.Block;
@@ -40,17 +45,20 @@ public class SellingBinMod implements ModInitializer {
             "\t\"minecraft:cobblestone\": {\n" +
             "\t  \"currency\": \"minecraft:iron_ingot\",\n" +
             "\t  \"sellPrice\": 1,\n" +
-            "\t  \"sellAmount\": 64\n" +
+            "\t  \"sellAmount\": 64,\n" +
+            "\t  \"color\": \"FFAAAAAA\"//color stored in argb hex format (first two symbols is alpha) \n" +
             "\t},\n" +
             "\t\"minecraft:glowstone\": {\n" +
             "\t  \"currency\": \"minecraft:iron_ingot\",\n" +
             "\t  \"sellPrice\": 3,\n" +
-            "\t  \"sellAmount\": 16\n" +
+            "\t  \"sellAmount\": 16,\n" +
+            "\t  \"color\": \"FFFFFF33\"\n" +
             "\t},\n" +
             "\t\"minecraft:wheat_seeds\": {\n" +
             "\t  \"currency\": \"minecraft:iron_ingot\",\n" +
             "\t  \"sellPrice\": 1,\n" +
-            "\t  \"sellAmount\": 64\n" +
+            "\t  \"sellAmount\": 64,\n" +
+            "\t  \"color\": \"FF33FF33\"\n" +
             "\t}\n" +
             "}";
 
@@ -157,6 +165,7 @@ public class SellingBinMod implements ModInitializer {
         }catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        ServerPlayConnectionEvents.INIT.register(ConfigSynchronizer::server);
     }
 
     public static void reload() {

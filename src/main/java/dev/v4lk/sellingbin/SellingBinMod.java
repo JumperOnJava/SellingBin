@@ -15,7 +15,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -57,8 +59,7 @@ public class SellingBinMod implements ModInitializer {
             "\t\"minecraft:wheat_seeds\": {\n" +
             "\t  \"currency\": \"minecraft:iron_ingot\",\n" +
             "\t  \"sellPrice\": 1,\n" +
-            "\t  \"sellAmount\": 64,\n" +
-            "\t  \"color\": \"FF33FF33\"\n" +
+            "\t  \"sellAmount\": 64\n" +
             "\t}\n" +
             "}";
 
@@ -103,6 +104,7 @@ public class SellingBinMod implements ModInitializer {
             content.add(IRON_BIN_BLOCK_ITEM);
             content.add(DIAMOND_BIN_BLOCK_ITEM);
         });
+
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(literal("reloadbinconfig")
                 .requires(source -> source.hasPermissionLevel(4))

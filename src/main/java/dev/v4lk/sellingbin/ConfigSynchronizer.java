@@ -1,22 +1,18 @@
 package dev.v4lk.sellingbin;
 
-import com.google.gson.GsonBuilder;
-import dev.v4lk.sellingbin.client.SellingBinModClient;
-import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
+import dev.v4lk.multitooltip.TooltipInit;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.*;
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientLoginNetworkHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -28,12 +24,12 @@ public class ConfigSynchronizer {
         ServerPlayNetworking.send(serverPlayNetworkHandler.player,new SyncPacket(SellingBinMod.trades));
     }
     public static void client(ClientPlayNetworkHandler networkHandler, MinecraftClient client) {
-        SellingBinModClient.trades = new ArrayList<>();
         ClientPlayNetworking.registerGlobalReceiver(SyncPacket.TYPE,ConfigSynchronizer::sync);
     }
 
     private static void sync(SyncPacket syncPacket, ClientPlayerEntity clientPlayerEntity, PacketSender packetSender) {
-        SellingBinModClient.trades = syncPacket.trades;
+        TooltipInit.matches.removeIf(match -> match instanceof Trade);
+        TooltipInit.matches.addAll(syncPacket.trades);
     }
 
 
@@ -56,7 +52,7 @@ public class ConfigSynchronizer {
             }
             trades = l;
         }
-        public SyncPacket(java.util.List<Trade> trades){
+        public SyncPacket(List<Trade> trades){
             this.trades = trades;
         }
         @Override

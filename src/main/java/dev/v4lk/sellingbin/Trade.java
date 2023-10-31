@@ -1,8 +1,17 @@
 package dev.v4lk.sellingbin;
 
+import dev.v4lk.multitooltip.Match;
+import dev.v4lk.multitooltip.TextItemTooltipComponent;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.item.TooltipData;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
-public class Trade {
+public class Trade implements Match, TooltipData{
     private String name;
     private String currency;
     private int sellPrice;
@@ -48,5 +57,22 @@ public class Trade {
     }
     public void setColor(int color) {
         this.color = Integer.toHexString(color);
+    }
+
+    @Override
+    public TooltipData data() {
+        return this;
+    }
+
+    @Override
+    public boolean matches(ItemStack stack) {
+        return Registries.ITEM.getId(stack.getItem()).equals(new Identifier(this.name));
+    }
+
+    public TooltipComponent getTooltipComponent() {
+        return new TextItemTooltipComponent(
+                Text.translatable("selling-bin.tooltip.selling", String.valueOf(sellAmount)).setStyle(Style.EMPTY.withColor(this.getColor())),
+                new ItemStack(Registries.ITEM.get(new Identifier(this.currency)), this.sellPrice)
+        );
     }
 }

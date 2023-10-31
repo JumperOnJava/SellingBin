@@ -1,6 +1,5 @@
 package dev.v4lk.sellingbin;
-
-import dev.v4lk.multitooltip.TooltipInit;
+import io.github.jumperonjava.multitooltipapi.MutliTooltipApi;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -28,8 +27,8 @@ public class ConfigSynchronizer {
     }
 
     private static void sync(SyncPacket syncPacket, ClientPlayerEntity clientPlayerEntity, PacketSender packetSender) {
-        TooltipInit.matches.removeIf(match -> match instanceof Trade);
-        TooltipInit.matches.addAll(syncPacket.trades);
+        MutliTooltipApi.matches.removeIf(match -> match instanceof Trade);
+        MutliTooltipApi.matches.addAll(syncPacket.trades);
     }
 
 

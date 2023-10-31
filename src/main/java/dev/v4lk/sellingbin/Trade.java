@@ -1,7 +1,7 @@
 package dev.v4lk.sellingbin;
 
-import dev.v4lk.multitooltip.Match;
-import dev.v4lk.multitooltip.TextItemTooltipComponent;
+import io.github.jumperonjava.multitooltipapi.Match;
+import io.github.jumperonjava.multitooltipapi.TextItemTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.item.ItemStack;

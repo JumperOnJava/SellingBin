@@ -22,6 +22,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -151,13 +153,29 @@ public class SellingBinMod implements ModInitializer {
         }
 
         try {
+            var wrongIdItemsCheck = new HashMap<Identifier, Item>();
             JsonObject json = JsonParser.parseReader(new FileReader(configFile)).getAsJsonObject();
             for (String key : json.keySet()) {
                 JsonElement tradeElement = json.get(key);
                 Trade trade = gson.fromJson(tradeElement, Trade.class);
                 trade.setName(key);
+
+                var id1 = new Identifier(key);
+                wrongIdItemsCheck.put(id1,Registries.ITEM.get(id1));
+                var id2 = new Identifier(trade.getCurrency());
+                wrongIdItemsCheck.put(id2,Registries.ITEM.get(id2));
                 trades.add(trade);
             }
+
+            var hasErrorToCrash = false;
+            for (var key : wrongIdItemsCheck.keySet()) {
+                if (wrongIdItemsCheck.get(key).equals(Items.AIR)){
+                    LOGGER.error("WRONG ITEM IDENTIFIER %s".formatted(key));
+                    hasErrorToCrash=true;
+                }
+            }
+            if(hasErrorToCrash)
+                throw new RuntimeException("Config contains nonexistent items");
         }catch (FileNotFoundException e) {
             e.printStackTrace();
         }

@@ -12,6 +12,7 @@ import dev.v4lk.sellingbin.bins.wooden.WoodenBinBlock;
 import dev.v4lk.sellingbin.bins.wooden.WoodenBinBlockEntity;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -167,15 +168,14 @@ public class SellingBinMod implements ModInitializer {
                 trades.add(trade);
             }
 
-            var hasErrorToCrash = false;
-            for (var key : wrongIdItemsCheck.keySet()) {
-                if (wrongIdItemsCheck.get(key).equals(Items.AIR)){
-                    LOGGER.error("WRONG ITEM IDENTIFIER %s".formatted(key));
-                    hasErrorToCrash=true;
+
+            ServerLifecycleEvents.SERVER_STARTING.register((minecraftServer)->{
+                for (var key : wrongIdItemsCheck.keySet()) {
+                    if (wrongIdItemsCheck.get(key).equals(Items.AIR)){
+                        LOGGER.error("WRONG ITEM IDENTIFIER %s".formatted(key));
+                    }
                 }
-            }
-            if(hasErrorToCrash)
-                throw new RuntimeException("Config contains nonexistent items");
+            });
         }catch (FileNotFoundException e) {
             e.printStackTrace();
         }

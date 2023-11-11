@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import dev.v4lk.sellingbin.bins.diamond.DiamondBinBlock;
 import dev.v4lk.sellingbin.bins.diamond.DiamondBinBlockEntity;
 import dev.v4lk.sellingbin.bins.iron.IronBinBlock;
@@ -26,7 +28,10 @@ import net.minecraft.item.ItemGroups;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +86,7 @@ public class SellingBinMod implements ModInitializer {
     public static final Identifier DIAMOND_BIN = new Identifier("selling-bin", "diamond_bin");
     public static final PlayerInventoryManager inventoryManager = new PlayerInventoryManager();
     public static final File inventoryFile = new File("config/selling-bin.dat");
+    private static HashMap<Identifier, Item> wrongIdItemsCheck;
 
 
     static {
@@ -138,48 +144,28 @@ public class SellingBinMod implements ModInitializer {
 
         Runtime.getRuntime().addShutdownHook(new ShutdownThread());
 
-        if (!(configFile.exists())) {
-            try {
-                configFile.createNewFile();
+        ServerLifecycleEvents.SERVER_STARTING.register(s->reload());
+        CommandRegistrationCallback.EVENT.register((dispatcher,registryAccess,registrationEnvironment)-> {
+            dispatcher.register(
+                    literal("sellingbin_log_wrong_ids").executes(context -> {
+                        for (var key : wrongIdItemsCheck.keySet()) {
+                            if (wrongIdItemsCheck.get(key).equals(Items.AIR)) {
+                                LOGGER.error("WRONG ITEM IDENTIFIER %s".formatted(key));
+                                if(context.getSource().isExecutedByPlayer()){
+                                    context.getSource().getPlayer().sendMessage(Text.literal("WRONG ITEM IDENTIFIER %s".formatted(key)).setStyle(Style.EMPTY.withColor(Formatting.RED)));
+                                }
+                            }
+                        }
+                        return 1;
+                    })
+            );
+        });
 
-                FileWriter fileWriter = new FileWriter(configFile);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-                bufferedWriter.write(defaultConfig);
-                bufferedWriter.close();
-
-                LOGGER.info("Default config has been written to the file.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        try {
-            var wrongIdItemsCheck = new HashMap<Identifier, Item>();
-            JsonObject json = JsonParser.parseReader(new FileReader(configFile)).getAsJsonObject();
-            for (String key : json.keySet()) {
-                JsonElement tradeElement = json.get(key);
-                Trade trade = gson.fromJson(tradeElement, Trade.class);
-                trade.setName(key);
-
-                var id1 = new Identifier(key);
-                wrongIdItemsCheck.put(id1,Registries.ITEM.get(id1));
-                var id2 = new Identifier(trade.getCurrency());
-                wrongIdItemsCheck.put(id2,Registries.ITEM.get(id2));
-                trades.add(trade);
-            }
-
-
-            ServerLifecycleEvents.SERVER_STARTING.register((minecraftServer)->{
-                for (var key : wrongIdItemsCheck.keySet()) {
-                    if (wrongIdItemsCheck.get(key).equals(Items.AIR)){
-                        LOGGER.error("WRONG ITEM IDENTIFIER %s".formatted(key));
-                    }
-                }
-            });
-        }catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
         ServerPlayConnectionEvents.INIT.register(ConfigSynchronizer::server);
+    }
+
+    private int printerror(CommandContext<Object> objectCommandContext) {
+        return 0;
     }
 
     public static void reload() {
@@ -198,16 +184,23 @@ public class SellingBinMod implements ModInitializer {
             }
         }
 
-        trades = new ArrayList<>();
-
         try {
+            wrongIdItemsCheck = new HashMap<Identifier, Item>();
             JsonObject json = JsonParser.parseReader(new FileReader(configFile)).getAsJsonObject();
             for (String key : json.keySet()) {
                 JsonElement tradeElement = json.get(key);
                 Trade trade = gson.fromJson(tradeElement, Trade.class);
                 trade.setName(key);
+
+                var id1 = new Identifier(key);
+                wrongIdItemsCheck.put(id1,Registries.ITEM.get(id1));
+                var id2 = new Identifier(trade.getCurrency());
+                wrongIdItemsCheck.put(id2,Registries.ITEM.get(id2));
                 trades.add(trade);
             }
+
+
+
         }catch (FileNotFoundException e) {
             e.printStackTrace();
         }
